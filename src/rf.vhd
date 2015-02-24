@@ -11,19 +11,19 @@ entity rf is
     CLK : in std_logic;
     RST : in std_logic;
     RW : in RW_TYPE;
-    RD_REG1 : in INT5;
-    RD_REG2 : in INT5;
-    WR_REG : in INT5;
-    WR_DATA : in INT32;
-    RD_DATA1 : out INT32;
-    RD_DATA2 : out INT32
+    RD_REG1 : in VEC5;
+    RD_REG2 : in VEC5;
+    WR_REG : in VEC5;
+    WR_DATA : in VEC32;
+    RD_DATA1 : out VEC32;
+    RD_DATA2 : out VEC32
   );
 end entity rf;
 
 architecture behav of rf is
 
   constant REG_NUM : integer := 32;
-  type REG_TYPE is array(0 to REG_NUM-1) of INT32;
+  type REG_TYPE is array(0 to REG_NUM-1) of VEC32;
   signal regs: REG_TYPE;
 
 begin

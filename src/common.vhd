@@ -8,7 +8,7 @@ package Common is
   type RW_TYPE is (R, W);
 
   -- alias
-  subtype INT5 is std_logic_vector(4 downto 0);
-  subtype INT16 is std_logic_vector(31 downto 0);
-  subtype INT32 is std_logic_vector(31 downto 0);
+  subtype VEC5 is std_logic_vector(4 downto 0);
+  subtype VEC16 is std_logic_vector(31 downto 0);
+  subtype VEC32 is std_logic_vector(31 downto 0);
 end Common;
