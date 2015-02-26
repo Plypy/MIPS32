@@ -4,9 +4,11 @@
 *~
 *.swap
 
-## ISE crap
+## Lots of ISE crap
 _xmsgs/
 xst/
+work/
+isim/
 *_summary.html
 *.bgn
 *.bld
@@ -40,6 +42,19 @@ xst/
 *.xreport
 *.xrpt
 *.xst
+*.exe
+*.cmd
+*.log
+*.cfg
+*.fdo
+*.ini
+transcript
+*.wlf
+*.version
+*.wdb
+*.udo
+*.xmsgs
+
 
 
 ## Project specific
