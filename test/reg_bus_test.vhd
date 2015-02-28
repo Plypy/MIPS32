@@ -6,23 +6,21 @@ use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
 use work.Common.all;
 
-ENTITY reg_bus_test IS
-END reg_bus_test;
+entity reg_bus_test is
+end entity reg_bus_test;
 
-ARCHITECTURE behavior OF reg_bus_test IS
-
-    -- Component Declaration for the Unit Under Test (UUT)
+architecture behavior of reg_bus_test is
   constant n : integer := 32;
 
-  COMPONENT reg
-    GENERIC(n: integer);
-  PORT(
-    WR : IN  std_logic;
-    OE : IN  std_logic;
-    DIN : IN  std_logic_vector(n-1 downto 0);
-    DOUT : OUT  std_logic_vector(n-1 downto 0)
-  );
-  END COMPONENT;
+  component reg is
+    generic(n: integer);
+    port(
+      WR : in  std_logic;
+      OE : in  std_logic;
+      DIN : in  std_logic_vector(n-1 downto 0);
+      DOUT : out  std_logic_vector(n-1 downto 0)
+    );
+  end component reg;
 
   signal wr1 : std_logic := '0';
   signal wr2 : std_logic := '0';
@@ -38,7 +36,7 @@ ARCHITECTURE behavior OF reg_bus_test IS
 
   signal tmp : std_logic := '0';
 
-BEGIN
+begin
 
   uut1: reg generic map (n => n)
     port map(wr1, oe1, data_in, data_bus);
@@ -83,4 +81,4 @@ wr2 <= clock and tmp;
     wait;
   end process;
 
-END;
+end architecture behavior;
