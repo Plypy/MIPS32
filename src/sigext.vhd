@@ -16,7 +16,7 @@ end entity sigext;
 
 architecture behav of sigext is
   alias imme : VEC16 is din(15 downto 0);
-  alias jump : VEC26 is din()
+  alias jump : VEC26 is din(25 downto 0);
 begin
   ext_proc : process( din, sel )
   begin
@@ -28,7 +28,7 @@ begin
     when "10" => --imme address extend
       dout <= std_logic_vector(resize(signed(imme & "00"), dout'length));
     when "11" => --jump extend
-      dout <= "0000" & din & "00";
+      dout <= "0000" & jump & "00";
     end case;
 
   end process ext_proc;
