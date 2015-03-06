@@ -8,25 +8,25 @@ use work.Common.all;
 
 entity gate is
   port (
-    oe : in std_logic;
-    dir : in std_logic;
-    north : inout vec32;
-    south : inout vec32
+    OE : in std_logic;
+    DIR : in std_logic;
+    NORTH : inout vec32;
+    SOUTH : inout vec32
   );
 end entity gate;
 
 architecture behav of gate is
 begin
 
-  process( oe, dir, north, south )
+  process( OE, DIR, NORTH, SOUTH )
   begin
-    if (oe = '0') then
-      north <= (others => 'Z');
-      south <= (others => 'Z');
-    elsif (dir = '0') then
-      north <= south;
-    elsif (dir = '1') then
-      south <= north;
+    if (OE = '0') then
+      NORTH <= (others => 'Z');
+      SOUTH <= (others => 'Z');
+    elsif (DIR = '0') then
+      NORTH <= SOUTH;
+    elsif (DIR = '1') then
+      SOUTH <= NORTH;
     end if;
   end process;
 

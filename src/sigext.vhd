@@ -8,27 +8,27 @@ use work.Common.all;
 
 entity sigext is
   port (
-    din : in VEC26;
-    sel : in VEC2;
-    dout : out VEC32
+    DIN : in VEC26;
+    SEL : in VEC2;
+    DOUT : out VEC32
   );
 end entity sigext;
 
 architecture behav of sigext is
-  alias imme : VEC16 is din(15 downto 0);
-  alias jump : VEC26 is din(25 downto 0);
+  alias imme : VEC16 is DIN(15 downto 0);
+  alias jump : VEC26 is DIN(25 downto 0);
 begin
-  ext_proc : process( din, sel )
+  ext_proc : process( DIN, SEL )
   begin
-    case sel is
+    case SEL is
     when ZERO_EXTEND => --imme zero extend
-      dout <= x"0000" & imme;
+      DOUT <= x"0000" & imme;
     when SIGN_EXTEND => --imme sign extend
-      dout <= std_logic_vector(resize(signed(imme), dout'length));
+      DOUT <= std_logic_vector(resize(signed(imme), DOUT'length));
     when ADDR_EXTEND => --imme address extend
-      dout <= std_logic_vector(resize(signed(imme & "00"), dout'length));
+      DOUT <= std_logic_vector(resize(signed(imme & "00"), DOUT'length));
     when JUMP_EXTEND => --jump extend
-      dout <= "0000" & jump & "00";
+      DOUT <= "0000" & jump & "00";
     end case;
 
   end process ext_proc;

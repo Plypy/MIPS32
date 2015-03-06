@@ -6,15 +6,15 @@ use IEEE.STD_LOGIC_1164.ALL;
 
 entity seg7 is
   port (
-    digit:  in std_logic_vector(3 downto 0);
-    led_out: out std_logic_vector(6 downto 0)
+    DIGIT:  in std_logic_vector(3 downto 0);
+    LED_OUT: out std_logic_vector(6 downto 0)
   );
 end entity seg7;
 
 architecture behav of Seg7 is
 begin
-  with digit select
-    led_out <=
+  with DIGIT select
+    LED_OUT <=
       "1111110" when "0000",
       "0110000" when "0001",
       "1101101" when "0010",

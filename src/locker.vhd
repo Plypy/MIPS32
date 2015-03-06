@@ -9,13 +9,13 @@ use work.Common.all;
 entity locker is
   generic (n : integer);
   port (
-    oe : in std_logic;
-    din : in std_logic_vector(n-1 downto 0);
-    dout : out std_logic_vector(n-1 downto 0)
+    OE : in std_logic;
+    DIN : in std_logic_vector(n-1 downto 0);
+    DOUT : out std_logic_vector(n-1 downto 0)
   );
 end entity locker;
 
 architecture behav of locker is
 begin
-  dout <= din when (oe = '1') else (others => 'Z');
+  DOUT <= DIN when (OE = '1') else (others => 'Z');
 end architecture behav;

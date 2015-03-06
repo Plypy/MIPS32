@@ -8,13 +8,13 @@ use work.Common.all;
 
 entity memory is
   port (
-    clk : in std_logic;
-    memrd : in std_logic;
-    memwr : in std_logic;
-    memlen : in LEN_TYPE;
-    addr : in vec32;
-    din : in vec32;
-    dout : out vec32
+    CLK : in std_logic;
+    MEMRD : in std_logic;
+    MEMWR : in std_logic;
+    MEMLEN : in LEN_TYPE;
+    ADDR : in VEC32;
+    DIN : in VEC32;
+    DOUT : out VEC32
   );
 end entity memory;
 
@@ -28,25 +28,25 @@ architecture behav of memory is
 
 begin
 
-  rw_proc : process( clk, memrd, memwr, memlen )
+  rw_proc : process( CLK, MEMRD, MEMWR, MEMLEN )
     variable adr : integer;
   begin
-    if (falling_edge(clk)) then
-      adr := to_integer(unsigned(addr));
-      if (memrd = '1') then
-        if (memlen = BYTE) then
-          dout <= x"000000" & sram(adr);
-        elsif (memlen = HWORD) then
-          dout <= x"0000" & sram(adr+1) & sram(adr);
+    if (falling_edge(CLK)) then
+      adr := to_integer(unsigned(ADDR));
+      if (MEMRD = '1') then
+        if (MEMLEN = BYTE) then
+          DOUT <= x"000000" & sram(adr);
+        elsif (MEMLEN = HWORD) then
+          DOUT <= x"0000" & sram(adr+1) & sram(adr);
         else
-          dout <= sram(adr+3) & sram(adr+2) & sram(adr+1) & sram(adr);
+          DOUT <= sram(adr+3) & sram(adr+2) & sram(adr+1) & sram(adr);
         end if;
-      elsif (memwr = '1') then
-        if (memlen = BYTE) then
-          sram(adr) <= din(7 downto 0);
-        elsif (memlen = HWORD) then
-          sram(adr) <= din(7 downto 0);
-          sram(adr+1) <= din(15 downto 0);
+      elsif (MEMWR = '1') then
+        if (MEMLEN = BYTE) then
+          sram(adr) <= DIN(7 downto 0);
+        elsif (MEMLEN = HWORD) then
+          sram(adr) <= DIN(7 downto 0);
+          sram(adr+1) <= DIN(15 downto 0);
         else
           sram(adr) <= din(7 downto 0);
           sram(adr+1) <= din(15 downto 8);

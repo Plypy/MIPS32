@@ -32,15 +32,15 @@ begin
     variable rd1 : integer;
     variable rd2 : integer;
   begin
-    if rst = '1' then
+    if RST = '1' then
       for i in 1 to REG_NUM-1 loop
         regs(i) <= (others => '0');
       end loop;
-    elsif rising_edge(clk) and RW = '1' then -- write later
+    elsif rising_edge(CLK) and RW = '1' then -- write later
       if WR_REG /= "00000" then -- REG0 is hardwired to zero
         regs(to_integer(unsigned(WR_REG))) <= WR_DATA;
       end if;
-    elsif falling_edge(clk) and RW = '0' then -- output earlier
+    elsif falling_edge(CLK) and RW = '0' then -- output earlier
       rd1 := to_integer(unsigned(RD_REG1));
       rd2 := to_integer(unsigned(RD_REG2));
       if rd1 = 0 then
