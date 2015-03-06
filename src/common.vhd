@@ -7,15 +7,26 @@ use IEEE.STD_LOGIC_1164.ALL;
 package Common is
   type RW_TYPE is (R, W);
   type ALU_TYPE is (ALU_ADD, ALU_ADDU);
+  type LEN_TYPE is (BYTE, HWORD, WORD);
+  type STATE_TYPE is (FI0,DE0,EX0,WB0);
 
   -- type alias
+  subtype VEC2 is std_logic_vector(1 downto 0);
   subtype VEC5 is std_logic_vector(4 downto 0);
   subtype VEC6 is std_logic_vector(5 downto 0);
+  subtype VEC8 is std_logic_vector(7 downto 0);
   subtype VEC16 is std_logic_vector(15 downto 0);
   subtype VEC26 is std_logic_vector(25 downto 0);
+  subtype VEC28 is std_logic_vector(27 downto 0);
   subtype VEC32 is std_logic_vector(31 downto 0);
 
   --constants
+  -- extend mode
+  constant ZERO_EXTEND : VEC2 := "00";
+  constant SIGN_EXTEND : VEC2 := "01";
+  constant ADDR_EXTEND : VEC2 := "10";
+  constant JUMP_EXTEND : VEC2 := "11";
+
   -- OPCODE
   constant OP_SPECIAL : VEC6 := "000000";
   constant OP_REGIMM : VEC6 := "000001";
