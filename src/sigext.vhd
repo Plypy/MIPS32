@@ -9,7 +9,7 @@ use work.Common.all;
 entity sigext is
   port (
     din : in VEC26;
-    sel : in std_logic_vector(1 downto 0);
+    sel : in VEC2;
     dout : out VEC32
   );
 end entity sigext;
@@ -21,17 +21,15 @@ begin
   ext_proc : process( din, sel )
   begin
     case sel is
-    when "00" => --imme zero extend
+    when ZERO_EXTEND => --imme zero extend
       dout <= x"0000" & imme;
-    when "01" => --imme sign extend
+    when SIGN_EXTEND => --imme sign extend
       dout <= std_logic_vector(resize(signed(imme), dout'length));
-    when "10" => --imme address extend
+    when ADDR_EXTEND => --imme address extend
       dout <= std_logic_vector(resize(signed(imme & "00"), dout'length));
-    when "11" => --jump extend
+    when JUMP_EXTEND => --jump extend
       dout <= "0000" & jump & "00";
     end case;
 
   end process ext_proc;
-  dout <= std_logic_vector(resize(unsigned(din), dout'length)) when (sel = '1') else
-    std_logic_vector(resize(signed(din), dout'length));
 end architecture behav;
