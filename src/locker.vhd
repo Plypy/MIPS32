@@ -17,5 +17,12 @@ end entity locker;
 
 architecture behav of locker is
 begin
-  DOUT <= DIN when (OE = '1') else (others => 'Z');
+  work_proc : process( OE, DIN )
+  begin
+    if (OE = '1') then
+      DOUT <= DIN;
+    else
+      DOUT <= (others => 'Z');
+    end if;
+  end process work_proc;
 end architecture behav;

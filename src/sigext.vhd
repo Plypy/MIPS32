@@ -29,6 +29,8 @@ begin
       DOUT <= std_logic_vector(resize(signed(imme & "00"), DOUT'length));
     when JUMP_EXTEND => --jump extend
       DOUT <= "0000" & jump & "00";
+    when others => -- shouldn't happen
+      DOUT <= (others => 'Z');
     end case;
 
   end process ext_proc;

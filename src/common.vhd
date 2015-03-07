@@ -8,7 +8,8 @@ package Common is
   type RW_TYPE is (R, W);
   type ALU_TYPE is (ALU_ADD, ALU_ADDU);
   type LEN_TYPE is (BYTE, HWORD, WORD);
-  type STATE_TYPE is (FI0,DE0,EX0,WB0);
+  type STATE_TYPE is (FI0, FI1,
+                      DE0,EX0,WB0);
 
   -- type alias
   subtype VEC2 is std_logic_vector(1 downto 0);

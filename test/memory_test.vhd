@@ -48,25 +48,25 @@ begin
   stim_proc : process
   begin
     wait for 9.5*clk_period;
-    addr <= x"00000000";
-    memwr <= '1';
-    memlen <= BYTE;
-    din <= x"00000000";
-    wait for clk_period;
-    addr <= x"00000001";
-    din <= x"00000001";
-    wait for clk_period;
-    addr <= x"00000002";
-    memlen <= HWORD;
-    din <= x"00000100";
-    wait for clk_period;
-    addr <= x"00000004";
-    memlen <= WORD;
-    din <= x"01000101";
+    -- addr <= x"00000000";
+    -- memwr <= '1';
+    -- memlen <= BYTE;
+    -- din <= x"00000000";
+    -- wait for clk_period;
+    -- addr <= x"00000001";
+    -- din <= x"00000001";
+    -- wait for clk_period;
+    -- addr <= x"00000002";
+    -- memlen <= HWORD;
+    -- din <= x"00000100";
+    -- wait for clk_period;
+    -- addr <= x"00000004";
+    -- memlen <= WORD;
+    -- din <= x"01000101";
 
-    wait for clk_period;
-    memwr <= '0';
-    wait for clk_period;
+    -- wait for clk_period;
+    -- memwr <= '0';
+    -- wait for clk_period;
 
     memrd <= '1';
     memlen <= BYTE;

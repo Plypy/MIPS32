@@ -11,6 +11,7 @@ entity reg is
   port (
     WR : in std_logic;
     OE : in std_logic;
+    RST : in std_logic;
     DIN : in std_logic_vector(n-1 downto 0);
     DOUT : out std_logic_vector(n-1 downto 0)
   );
@@ -19,10 +20,12 @@ end entity reg;
 architecture behav of reg is
 begin
 
-  work_proc : process( WR, OE )
+  work_proc : process( RST, WR, OE )
     variable data : std_logic_vector(n-1 downto 0);
   begin
-    if (rising_edge(WR)) then
+    if RST = '1' then
+      data := (others => '0');
+    elsif (rising_edge(WR)) then
       data := DIN;
     end if;
     if (OE = '1') then

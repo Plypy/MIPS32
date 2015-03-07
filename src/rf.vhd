@@ -40,7 +40,7 @@ begin
       if WR_REG /= "00000" then -- REG0 is hardwired to zero
         regs(to_integer(unsigned(WR_REG))) <= WR_DATA;
       end if;
-    elsif falling_edge(CLK) and RW = '0' then -- output earlier
+    elsif RW = '0' then -- output earlier
       rd1 := to_integer(unsigned(RD_REG1));
       rd2 := to_integer(unsigned(RD_REG2));
       if rd1 = 0 then
