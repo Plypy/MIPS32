@@ -11,17 +11,18 @@ entity alu is
     OP : in ALU_TYPE;
     A : in vec32;
     B : in vec32;
-    C : out vec32; --result
-    D : out vec32; --extended result
+    C : out vec33; --result
     -- flags
-    Z : out std_logic;
-    O : out std_logic
+    Z : out std_logic
   );
 end entity alu;
 
 architecture behav of alu is
-
+  signal C_tmp : vec33 := ("0" & x"00000000");
 begin
+  C <= C_tmp;
+  Z <= '1' when (C_tmp = ("0" & x"00000000")) else '0';
+
   work_proc : process( OP, A, B )
     variable as : signed(31 downto 0);
     variable bs : signed(31 downto 0);
@@ -34,9 +35,13 @@ begin
     bu := unsigned(B);
     case OP is
       when ALU_ADD =>
-        C <= std_logic_vector(as + bs);
+        C_tmp <= std_logic_vector(resize(as + bs, C_tmp'length));
       when ALU_ADDU =>
-        C <= std_logic_vector(au + bu);
+        C_tmp <= std_logic_vector(resize(au + bu, C_tmp'length));
+      when ALU_SUB =>
+        C_tmp <= std_logic_vector(resize(as - bs, C_tmp'length));
+      when ALU_SUBU =>
+        C_tmp <= std_logic_vector(resize(au - bu, C_tmp'length));
     end case;
   end process work_proc;
 end architecture behav;

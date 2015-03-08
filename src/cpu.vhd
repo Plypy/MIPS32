@@ -32,6 +32,16 @@ architecture behav of cpu is
     );
   end component reg;
 
+  component reg0 is
+    port (
+      WR : in std_logic;
+      OE : in std_logic;
+      RST : in std_logic;
+      DIN : in std_logic;
+      DOUT : out std_logic
+    );
+  end component reg0;
+
   component aluc is
     port (
       INST : in VEC32;
@@ -56,13 +66,11 @@ architecture behav of cpu is
   component alu is
     port (
       OP : in ALU_TYPE;
-      A : in VEC32;
-      B : in VEC32;
-      C : out VEC32; --result
-      D : out VEC32; --extended result
+      A : in vec32;
+      B : in vec32;
+      C : out vec33; --result
       -- flags
-      Z : out std_logic;
-      O : out std_logic
+      Z : out std_logic
     );
   end component alu;
 
@@ -173,10 +181,9 @@ architecture behav of cpu is
   signal imme_oe : std_logic;
 
   signal alu_op : ALU_TYPE;
-  signal alu_res : VEC32;
-  signal alu_ext : VEC32;
+  signal alu_res : VEC33;
   signal alu_z : std_logic;
-  signal alu_o : std_logic;
+  signal alu_z_tmp : std_logic;
   signal alu_wr : std_logic;
   signal alu_oe : std_logic;
 
@@ -222,9 +229,10 @@ begin
 
   -- alu, aluc and its register
   aluc0 : aluc port map(ir_data, alu_op);
-  alu0 : alu port map(alu_op, bus1, bus2, alu_res, alu_ext, alu_z, alu_o);
+  alu0 : alu port map(alu_op, bus1, bus2, alu_res, alu_z_tmp);
   alu_reg : reg generic map(n => n)
-    port map(alu_wr_true, alu_oe, RST, alu_res, bus2);
+    port map(alu_wr_true, alu_oe, RST, alu_res(n-1 downto 0), bus2);
+  aluz_reg : reg0 port map(alu_wr_true, ONE, RST, alu_z_tmp, alu_z);
 
   ir : reg generic map(n => n)
     port map(ir_wr_true, ONE, RST, bus1, ir_data);
@@ -269,6 +277,7 @@ begin
 
   control_proc : process( rst, clk )
     variable state : STATE_TYPE := FI0;
+    variable ir_type : INST_TYPE := R_TYPE;
   begin
     if rst = '1' then
       state := FI0;
@@ -344,23 +353,131 @@ begin
         mem_rd <= '1';
         mem_wr <= '0';
         mem_len <= WORD;
+
         state := DE0;
       elsif state = DE0 then
+        if op_field = OP_SPECIAL then
+          ir_type := R_TYPE;
+        elsif op_field = OP_J or op_field = OP_JAL then
+          ir_type := J_TYPE;
+        elsif (op_field(5 downto 2) = "0001") then-- branches
+          ir_type := I_BTYPE;
+        else
+          ir_type := I_TYPE;
+        end if;
+        pc_oe <= '0';
+        pc_wr <= '0';
+        pc_upper_sel <= '0';
+        pc_nxt_oe <= '0';
+        pc_sel <= '0';
+
+        alu_oe <= '0';
+        alu_wr <= '1';
+
+        ir_wr <= '0';
+        wreg_sel <= '0';
+        if (ir_type = J_TYPE) then
+          ext_sel <= JUMP_EXTEND;
+        elsif (ir_type = I_BTYPE) then
+          ext_sel <= ADDR_EXTEND;
+        elsif (ir_type = I_TYPE) then
+          ext_sel <= '0' & op_field(0); -- sign/zero extend
+        end if;
+        if (ir_type = R_TYPE or ir_type = I_BTYPE) then
+          imme_oe <= '0';
+        else
+          imme_oe <= '1';
+        end if;
+
+        rf_rw <= '0';
+        if (ir_type = R_TYPE or ir_type = I_BTYPE) then
+          rf_oe1 <= '1';
+          rf_oe2 <= '1';
+        elsif (ir_type = I_TYPE) then
+          rf_oe1 <= '1';
+          rf_oe2 <= '0';
+        else
+          rf_oe1 <= '0';
+          rf_oe2 <= '0';
+        end if;
+
+        goe <= '0';
+        gdir <= '0';
+
+        mem_oe <= '0';
+        mdr_src <= '0';
+        mdr_oe <= '0';
+        mdr_wr <= '0';
+        mar_wr <= '0';
+        mem_rd <= '0';
+        mem_wr <= '0';
+        mem_len <= WORD;
+        state := EX0;
+      elsif state = EX0 then -- nxt pc
         pc_oe <= '0';
         pc_wr <= '1';
         pc_upper_sel <= '0';
-        pc_sel <= '0';
         pc_nxt_oe <= '1';
+        if (ir_type = I_BTYPE) then
+          if (op_field = OP_BNE) then
+            pc_sel <= not alu_z;
+          elsif (op_field = OP_BEQ) then
+            pc_sel <= alu_z;
+          else
+            pc_sel <= '0';
+          end if;
+        else
+          pc_sel <= '0';
+        end if;
 
         alu_oe <= '0';
         alu_wr <= '0';
 
         ir_wr <= '0';
         wreg_sel <= '0';
-        ext_sel <= ZERO_EXTEND;
+        ext_sel <= ADDR_EXTEND;
         imme_oe <= '0';
 
         rf_rw <= '0';
+        rf_oe1 <= '0';
+        rf_oe2 <= '0';
+
+        goe <= '0';
+        gdir <= '0';
+
+        mem_oe <= '0';
+        mdr_src <= '0';
+        mdr_oe <= '0';
+        mdr_wr <= '0';
+        mar_wr <= '0';
+        mem_rd <= '0';
+        mem_wr <= '0';
+        mem_len <= WORD;
+        if (ir_type = I_BTYPE) then
+          state := FI0;
+        else
+          state := WB0;
+        end if;
+      elsif (state = WB0) then
+        pc_oe <= '0';
+        pc_wr <= '0';
+        pc_upper_sel <= '0';
+        pc_nxt_oe <= '0';
+        pc_sel <= '0';
+
+        alu_oe <= '1';
+        alu_wr <= '0';
+
+        ir_wr <= '0';
+        if (ir_type = R_TYPE) then
+          wreg_sel <= '1';
+        else
+          wreg_sel <= '0';
+        end if;
+        ext_sel <= ZERO_EXTEND;
+        imme_oe <= '0';
+
+        rf_rw <= '1';
         rf_oe1 <= '0';
         rf_oe2 <= '0';
 

@@ -29,6 +29,10 @@ begin
   with op_field select ALUOP <=
     special when OP_SPECIAL,
     ALU_ADD when OP_ADDI,
-    ALU_ADDU when OP_ADDIU;
+    ALU_ADDU when OP_ADDIU,
+    ALU_SUBU when OP_BEQ,
+    ALU_SUBU when OP_BNE,
+    ALU_SUBU when OP_BLEZ,
+    ALU_SUBU when OP_BGTZ;
 
 end architecture behav;
