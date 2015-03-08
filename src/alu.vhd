@@ -42,6 +42,14 @@ begin
         C_tmp <= std_logic_vector(resize(as - bs, C_tmp'length));
       when ALU_SUBU =>
         C_tmp <= std_logic_vector(resize(au - bu, C_tmp'length));
+      when ALU_AND =>
+        C_tmp <= '0' & (A and B);
+      when ALU_OR =>
+        C_tmp <= '0' & (A or B);
+      when ALU_XOR =>
+        C_tmp <= '0' & (A xor B);
+      when ALU_NOR =>
+        C_tmp <= '0' & (A nor B);
     end case;
   end process work_proc;
 end architecture behav;

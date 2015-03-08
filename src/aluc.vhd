@@ -24,15 +24,21 @@ architecture behav of aluc is
 begin
   with func_field select special <=
     ALU_ADD when FUNC_SPC_ADD,
-    ALU_ADDU when FUNC_SPC_ADDU;
+    ALU_ADDU when FUNC_SPC_ADDU,
+    ALU_SUB when FUNC_SPC_SUB,
+    ALU_SUBU when FUNC_SPC_SUBU,
+    ALU_AND when FUNC_SPC_AND,
+    ALU_OR when FUNC_SPC_OR,
+    ALU_XOR when FUNC_SPC_XOR,
+    ALU_NOR when FUNC_SPC_NOR;
 
   with op_field select ALUOP <=
     special when OP_SPECIAL,
-    ALU_ADD when OP_ADDI,
-    ALU_ADDU when OP_ADDIU,
     ALU_SUBU when OP_BEQ,
     ALU_SUBU when OP_BNE,
     ALU_SUBU when OP_BLEZ,
-    ALU_SUBU when OP_BGTZ;
+    ALU_SUBU when OP_BGTZ,
+    ALU_ADD when OP_ADDI,
+    ALU_ADDU when OP_ADDIU;
 
 end architecture behav;

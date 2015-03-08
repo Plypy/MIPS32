@@ -6,7 +6,8 @@ use IEEE.STD_LOGIC_1164.ALL;
 
 package Common is
   type RW_TYPE is (R, W);
-  type ALU_TYPE is (ALU_ADD, ALU_ADDU, ALU_SUB, ALU_SUBU);
+  type ALU_TYPE is (ALU_ADD, ALU_ADDU, ALU_SUB, ALU_SUBU,
+    ALU_AND, ALU_OR, ALU_XOR, ALU_NOR);
   type LEN_TYPE is (BYTE, HWORD, WORD);
   type STATE_TYPE is (FI0, FI1,
                       DE0,EX0,WB0);
