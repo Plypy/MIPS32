@@ -24,22 +24,19 @@ begin
   Z <= '1' when (C_tmp = ("0" & x"00000000")) else '0';
 
   work_proc : process( OP, A, B )
-    variable as : signed(31 downto 0);
-    variable bs : signed(31 downto 0);
     variable au : unsigned(31 downto 0);
     variable bu : unsigned(31 downto 0);
   begin
-    as := signed(A);
-    bs := signed(B);
     au := unsigned(A);
     bu := unsigned(B);
     case OP is
+      -- add works exactly the same as addu except it will trap on overflow
       when ALU_ADD =>
-        C_tmp <= std_logic_vector(resize(as + bs, C_tmp'length));
+        C_tmp <= std_logic_vector(resize(au + bu, C_tmp'length));
       when ALU_ADDU =>
         C_tmp <= std_logic_vector(resize(au + bu, C_tmp'length));
-      when ALU_SUB =>
-        C_tmp <= std_logic_vector(resize(as - bs, C_tmp'length));
+      when ALU_SUB => -- likewise
+        C_tmp <= std_logic_vector(resize(au - bu, C_tmp'length));
       when ALU_SUBU =>
         C_tmp <= std_logic_vector(resize(au - bu, C_tmp'length));
       when ALU_AND =>
