@@ -7,11 +7,15 @@ use IEEE.STD_LOGIC_1164.ALL;
 package Common is
   type RW_TYPE is (R, W);
   type ALU_TYPE is (ALU_ADD, ALU_ADDU, ALU_SUB, ALU_SUBU,
-    ALU_AND, ALU_OR, ALU_XOR, ALU_NOR);
+    ALU_AND, ALU_OR, ALU_XOR, ALU_NOR,
+    ALU_SLL, ALU_SRL, ALU_ROTR, ALU_SRA,
+    ALU_SLLV, ALU_SRLV, ALU_ROTRV, ALU_SRAV,
+    ALU_SLT, ALU_SLTU);
   type LEN_TYPE is (BYTE, HWORD, WORD);
   type STATE_TYPE is (FI0, FI1,
                       DE0,EX0,WB0);
   type INST_TYPE is (R_TYPE, I_TYPE, I_BTYPE, J_TYPE);
+  type EXT_TYPE is (SIGN_EXTEND, ZERO_EXTEND, ADDR_EXTEND, JUMP_EXTEND, UP_EXTEND);
 
   -- type alias
   subtype VEC2 is std_logic_vector(1 downto 0);
@@ -26,10 +30,10 @@ package Common is
 
   --constants
   -- extend mode
-  constant SIGN_EXTEND : VEC2 := "00";
-  constant ZERO_EXTEND : VEC2 := "01";
-  constant ADDR_EXTEND : VEC2 := "10";
-  constant JUMP_EXTEND : VEC2 := "11";
+  -- constant SIGN_EXTEND : VEC2 := "00";
+  -- constant ZERO_EXTEND : VEC2 := "01";
+  -- constant ADDR_EXTEND : VEC2 := "10";
+  -- constant JUMP_EXTEND : VEC2 := "11";
 
   -- OPCODE
   constant OP_SPECIAL : VEC6 := "000000";
@@ -77,6 +81,19 @@ package Common is
   constant FUNC_SPC_XOR : VEC6 := "100110";
   constant FUNC_SPC_NOR : VEC6 := "100111";
 
-  constant FUN_SPC_SLT : VEC6 := "101010";
-  constant FUN_SPC_SLTU : VEC6 := "101011";
+  constant FUNC_SPC_SLT : VEC6 := "101010";
+  constant FUNC_SPC_SLTU : VEC6 := "101011";
+
+  function boolean_to_std_logic(cond : boolean) return std_logic;
 end Common;
+
+package body Common is
+  function boolean_to_std_logic(cond : boolean) return std_logic is
+  begin
+    if (cond) then
+      return ('1');
+    else
+      return ('0');
+    end if;
+  end function boolean_to_std_logic;
+end package body;

@@ -42,13 +42,6 @@ architecture behav of cpu is
     );
   end component reg0;
 
-  component aluc is
-    port (
-      INST : in VEC32;
-      ALUOP : out ALU_TYPE
-    );
-  end component aluc;
-
   component rf is
     port (
       CLK : in std_logic;
@@ -63,12 +56,21 @@ architecture behav of cpu is
     );
   end component rf;
 
+  component aluc is
+    port (
+      INST : in VEC32;
+      SHAMT : out VEC5;
+      ALUOP : out ALU_TYPE
+    );
+  end component aluc;
+
   component alu is
     port (
       OP : in ALU_TYPE;
-      A : in vec32;
-      B : in vec32;
-      C : out vec33; --result
+      A : in VEC32;
+      B : in VEC32;
+      S : in VEC5;
+      C : out VEC33; --result
       -- flags
       Z : out std_logic
     );
@@ -96,7 +98,7 @@ architecture behav of cpu is
   component sigext is
     port (
       din : in VEC26;
-      sel : in std_logic_vector(1 downto 0);
+      sel : in EXT_TYPE;
       dout : out VEC32
     );
   end component sigext;
@@ -137,6 +139,7 @@ architecture behav of cpu is
 
   constant ONE : std_logic := '1';
   constant ZERO : std_logic := '0';
+  constant LINK_NUM : VEC5 := "11111";
   constant FOUR : VEC32 := x"00000004";
 
   -- control signal
@@ -168,7 +171,9 @@ architecture behav of cpu is
   alias jump_field : VEC26 is ir_data(25 downto 0);
 
   signal wreg_sel : std_logic;
+  signal link_sel : std_logic;
   signal wreg : VEC5;
+  signal wreg_tmp : VEC5;
 
   signal rf_rw : std_logic;
   signal rf_oe1 : std_logic;
@@ -176,16 +181,19 @@ architecture behav of cpu is
   signal rf_data1 : VEC32;
   signal rf_data2 : VEC32;
 
-  signal ext_sel : std_logic_vector(1 downto 0);
+  signal ext_sel : EXT_TYPE;
   signal ext_res : VEC32;
   signal imme_oe : std_logic;
 
   signal alu_op : ALU_TYPE;
+  signal alu_sh : VEC5;
   signal alu_res : VEC33;
   signal alu_z : std_logic;
   signal alu_z_tmp : std_logic;
   signal alu_wr : std_logic;
   signal alu_oe : std_logic;
+  alias alu_sign : std_logic is alu_res(31);
+  alias alu_exsign : std_logic is alu_res(32);
 
   signal goe : std_logic;
   signal gdir : std_logic;
@@ -228,8 +236,8 @@ begin
     port map(pc_nxt_oe, pc_nxt, bus2);
 
   -- alu, aluc and its register
-  aluc0 : aluc port map(ir_data, alu_op);
-  alu0 : alu port map(alu_op, bus1, bus2, alu_res, alu_z_tmp);
+  aluc0 : aluc port map(ir_data, alu_sh, alu_op);
+  alu0 : alu port map(alu_op, bus1, bus2, alu_sh, alu_res, alu_z_tmp);
   alu_reg : reg generic map(n => n)
     port map(alu_wr_true, alu_oe, RST, alu_res(n-1 downto 0), bus2);
   aluz_reg : reg0 port map(alu_wr_true, ONE, RST, alu_z_tmp, alu_z);
@@ -238,8 +246,10 @@ begin
     port map(ir_wr_true, ONE, RST, bus1, ir_data);
 
   -- rf and its tristate locks
-  wr_mux : mux2 generic map(n => 5)
-    port map(rt_field, rd_field, wreg_sel, wreg);
+  wr_mux0 : mux2 generic map(n => 5)
+    port map(rt_field, rd_field, wreg_sel, wreg_tmp);
+  wr_mux1 : mux2 generic map(n => 5)--special mux for link
+    port map(wreg_tmp, LINK_NUM, link_sel, wreg);
   regfiles : rf port map(CLK, RST, rf_rw,
     rs_field, rt_field, wreg, bus2, rf_data1, rf_data2);
   rf_lock1 : locker generic map(n => n)
@@ -304,6 +314,7 @@ begin
 
         ir_wr <= '0';
         wreg_sel <= '0';
+        link_sel <= '0';
         ext_sel <= ZERO_EXTEND;
         imme_oe <= '0';
 
@@ -335,6 +346,7 @@ begin
 
         ir_wr <= '1';
         wreg_sel <= '0';
+        link_sel <= '0';
         ext_sel <= ZERO_EXTEND;
         imme_oe <= '0';
 
@@ -376,12 +388,19 @@ begin
 
         ir_wr <= '0';
         wreg_sel <= '0';
+        link_sel <= '0';
         if (ir_type = J_TYPE) then
           ext_sel <= JUMP_EXTEND;
         elsif (ir_type = I_BTYPE) then
           ext_sel <= ADDR_EXTEND;
         elsif (ir_type = I_TYPE) then
-          ext_sel <= '0' & op_field(0); -- sign/zero extend
+          if (op_field(2) = '0') then -- add, slt
+            ext_sel <= SIGN_EXTEND;
+          elsif (op_field(2 downto 0) = "111") then -- lui
+            ext_sel <= UP_EXTEND;
+          else
+            ext_sel <= ZERO_EXTEND;
+          end if;
         end if;
         if (ir_type = R_TYPE or ir_type = I_BTYPE) then
           imme_oe <= '0';
@@ -423,6 +442,10 @@ begin
             pc_sel <= not alu_z;
           elsif (op_field = OP_BEQ) then
             pc_sel <= alu_z;
+          elsif (op_field = OP_BLEZ) then
+            pc_sel <= alu_z or alu_sign;
+          elsif (op_field = OP_BGTZ) then
+            pc_sel <= not (alu_z or alu_sign);
           else
             pc_sel <= '0';
           end if;
@@ -435,6 +458,7 @@ begin
 
         ir_wr <= '0';
         wreg_sel <= '0';
+        link_sel <= '0';
         ext_sel <= ADDR_EXTEND;
         imme_oe <= '0';
 
@@ -474,6 +498,7 @@ begin
         else
           wreg_sel <= '0';
         end if;
+        link_sel <= '0';
         ext_sel <= ZERO_EXTEND;
         imme_oe <= '0';
 

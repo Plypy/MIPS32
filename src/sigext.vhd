@@ -9,7 +9,7 @@ use work.Common.all;
 entity sigext is
   port (
     DIN : in VEC26;
-    SEL : in VEC2;
+    SEL : in EXT_TYPE;
     DOUT : out VEC32
   );
 end entity sigext;
@@ -29,6 +29,8 @@ begin
       DOUT <= std_logic_vector(resize(signed(imme & "00"), DOUT'length));
     when JUMP_EXTEND => --jump extend
       DOUT <= "0000" & jump & "00";
+    when UP_EXTEND => -- upper extend
+      DOUT <= imme & x"0000";
     when others => -- shouldn't happen
       DOUT <= (others => 'Z');
     end case;
