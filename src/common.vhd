@@ -14,7 +14,7 @@ package Common is
   type LEN_TYPE is (BYTE, HWORD, WORD);
   type STATE_TYPE is (FI0, FI1,
                       DE0,EX0,WB0);
-  type INST_TYPE is (R_TYPE, I_TYPE, I_BTYPE, J_TYPE);
+  type INST_TYPE is (R_TYPE, I_TYPE, I_BTYPE, J_TYPE, JL_TYPE);
   type EXT_TYPE is (SIGN_EXTEND, ZERO_EXTEND, ADDR_EXTEND, JUMP_EXTEND, UP_EXTEND);
 
   -- type alias
@@ -66,6 +66,9 @@ package Common is
   constant FUNC_SPC_SLLV : VEC6 := "000100";
   constant FUNC_SPC_SRLV : VEC6 := "000110"; -- furthermore bit6 decides whether to perform ROTR
   constant FUNC_SPC_SRAV : VEC6 := "000111";
+
+  constant FUNC_SPC_JR : VEC6 := "001000";
+  constant FUNC_SPC_JALR : VEC6 := "001001";
 
   constant FUNC_SPC_MULT : VEC6 := "011000";
   constant FUNC_SPC_MULTU : VEC6 := "011001";

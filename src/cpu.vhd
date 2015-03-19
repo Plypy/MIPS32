@@ -368,19 +368,30 @@ begin
 
         state := DE0;
       elsif state = DE0 then
-        if op_field = OP_SPECIAL then
-          ir_type := R_TYPE;
-        elsif op_field = OP_J or op_field = OP_JAL then
+        if op_field = OP_J then
           ir_type := J_TYPE;
+        elsif op_field = OP_JAL then
+          ir_type := JL_TYPE;
+        elsif op_field = OP_SPECIAL then
+          ir_type := R_TYPE;
         elsif (op_field(5 downto 2) = "0001") then-- branches
           ir_type := I_BTYPE;
         else
           ir_type := I_TYPE;
         end if;
         pc_oe <= '0';
-        pc_wr <= '0';
-        pc_upper_sel <= '0';
-        pc_nxt_oe <= '0';
+        if ir_type = J_TYPE then
+          pc_wr <= '1';
+          pc_upper_sel <= '1';
+        else
+          pc_wr <= '0';
+          pc_upper_sel <= '0';
+        end if;
+        if ir_type = JL_TYPE then
+          pc_nxt_oe <= '1';
+        else
+          pc_nxt_oe <= '0';
+        end if;
         pc_sel <= '0';
 
         alu_oe <= '0';
@@ -388,8 +399,12 @@ begin
 
         ir_wr <= '0';
         wreg_sel <= '0';
-        link_sel <= '0';
-        if (ir_type = J_TYPE) then
+        if (ir_type = JL_TYPE) then
+          link_sel <= '1';
+        else
+          link_sel <= '0';
+        end if;
+        if (ir_type = J_TYPE or ir_type = JL_TYPE) then
           ext_sel <= JUMP_EXTEND;
         elsif (ir_type = I_BTYPE) then
           ext_sel <= ADDR_EXTEND;
@@ -402,13 +417,17 @@ begin
             ext_sel <= ZERO_EXTEND;
           end if;
         end if;
-        if (ir_type = R_TYPE or ir_type = I_BTYPE) then
+        if (ir_type = R_TYPE or ir_type = I_BTYPE or ir_type = JL_TYPE) then
           imme_oe <= '0';
         else
           imme_oe <= '1';
         end if;
 
-        rf_rw <= '0';
+        if (ir_type = JL_TYPE) then
+          rf_rw <= '1';
+        else
+          rf_rw <= '0';
+        end if;
         if (ir_type = R_TYPE or ir_type = I_BTYPE) then
           rf_oe1 <= '1';
           rf_oe2 <= '1';
@@ -431,12 +450,22 @@ begin
         mem_rd <= '0';
         mem_wr <= '0';
         mem_len <= WORD;
-        state := EX0;
+
+        if ir_type = J_TYPE then
+          state := FI0;
+        else
+          state := EX0;
+        end if;
       elsif state = EX0 then -- nxt pc
         pc_oe <= '0';
         pc_wr <= '1';
-        pc_upper_sel <= '0';
-        pc_nxt_oe <= '1';
+        if ir_type = JL_TYPE then
+          pc_upper_sel <= '1';
+          pc_nxt_oe <= '0';
+        else
+          pc_upper_sel <= '0';
+          pc_nxt_oe <= '1';
+        end if;
         if (ir_type = I_BTYPE) then
           if (op_field = OP_BNE) then
             pc_sel <= not alu_z;
@@ -459,8 +488,13 @@ begin
         ir_wr <= '0';
         wreg_sel <= '0';
         link_sel <= '0';
-        ext_sel <= ADDR_EXTEND;
-        imme_oe <= '0';
+        if ir_type = JL_TYPE then
+          imme_oe <= '1';
+          ext_sel <= JUMP_EXTEND;
+        else
+          imme_oe <= '0';
+          ext_sel <= ADDR_EXTEND;
+        end if;
 
         rf_rw <= '0';
         rf_oe1 <= '0';
@@ -477,7 +511,7 @@ begin
         mem_rd <= '0';
         mem_wr <= '0';
         mem_len <= WORD;
-        if (ir_type = I_BTYPE) then
+        if (ir_type = I_BTYPE or ir_type = JL_TYPE) then
           state := FI0;
         else
           state := WB0;
