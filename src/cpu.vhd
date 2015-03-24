@@ -404,9 +404,7 @@ begin
         else
           link_sel <= '0';
         end if;
-        if (ir_type = J_TYPE or ir_type = JL_TYPE) then
-          ext_sel <= JUMP_EXTEND;
-        elsif (ir_type = I_BTYPE) then
+        if (ir_type = J_TYPE or ir_type = JL_TYPE or ir_type = I_BTYPE) then
           ext_sel <= ADDR_EXTEND;
         elsif (ir_type = I_TYPE) then
           if (op_field(2) = '0') then -- add, slt
@@ -490,11 +488,10 @@ begin
         link_sel <= '0';
         if ir_type = JL_TYPE then
           imme_oe <= '1';
-          ext_sel <= JUMP_EXTEND;
         else
           imme_oe <= '0';
-          ext_sel <= ADDR_EXTEND;
         end if;
+        ext_sel <= ADDR_EXTEND;
 
         rf_rw <= '0';
         rf_oe1 <= '0';

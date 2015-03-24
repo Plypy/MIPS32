@@ -15,7 +15,7 @@ package Common is
   type STATE_TYPE is (FI0, FI1,
                       DE0,EX0,WB0);
   type INST_TYPE is (R_TYPE, I_TYPE, I_BTYPE, J_TYPE, JL_TYPE);
-  type EXT_TYPE is (SIGN_EXTEND, ZERO_EXTEND, ADDR_EXTEND, JUMP_EXTEND, UP_EXTEND);
+  type EXT_TYPE is (SIGN_EXTEND, ZERO_EXTEND, ADDR_EXTEND, UP_EXTEND);
 
   -- type alias
   subtype VEC2 is std_logic_vector(1 downto 0);

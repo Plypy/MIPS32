@@ -30,6 +30,7 @@ architecture behav of memory is
   -- addiu r1, r0, 0x1234
   -- addiu r2, r0, 0x4321
   -- addu r3, r1, r2
+  -- jal 0x00
   -- bne r1, r2, start
     0 => x"34",
     1 => x"12",
