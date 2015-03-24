@@ -375,6 +375,8 @@ begin
         elsif op_field = OP_SPECIAL then
           if func_field = FUNC_SPC_JR then
             ir_type := R_JTYPE;
+          elsif func_field = FUNC_SPC_JALR then
+            ir_type := R_JLTYPE;
           else
             ir_type := R_TYPE;
           end if;
@@ -395,7 +397,7 @@ begin
           end if;
           pc_upper_sel <= '0';
         end if;
-        if ir_type = JL_TYPE then
+        if ir_type = JL_TYPE or ir_type = R_JLTYPE then
           pc_nxt_oe <= '1';
         else
           pc_nxt_oe <= '0';
@@ -406,7 +408,11 @@ begin
         alu_wr <= '1';
 
         ir_wr <= '0';
-        wreg_sel <= '0';
+        if ir_type = R_JLTYPE then
+          wreg_sel <= '1';
+        else
+          wreg_sel <= '0';
+        end if;
         if (ir_type = JL_TYPE) then
           link_sel <= '1';
         else
@@ -424,13 +430,13 @@ begin
           end if;
         end if;
         if (ir_type = R_TYPE or ir_type = I_BTYPE or
-            ir_type = JL_TYPE or ir_type = R_JTYPE) then
+            ir_type = JL_TYPE or ir_type = R_JTYPE or ir_type = R_JLTYPE) then
           imme_oe <= '0';
         else
           imme_oe <= '1';
         end if;
 
-        if (ir_type = JL_TYPE) then
+        if (ir_type = JL_TYPE or ir_type = R_JLTYPE) then
           rf_rw <= '1';
         else
           rf_rw <= '0';
@@ -476,7 +482,11 @@ begin
           pc_nxt_oe <= '0';
         else
           pc_upper_sel <= '0';
-          pc_nxt_oe <= '1';
+          if ir_type = R_JLTYPE then
+            pc_nxt_oe <= '0';
+          else
+            pc_nxt_oe <= '1';
+          end if;
         end if;
         if (ir_type = I_BTYPE) then
           if (op_field = OP_BNE) then
@@ -508,11 +518,18 @@ begin
         ext_sel <= ADDR_EXTEND;
 
         rf_rw <= '0';
-        rf_oe1 <= '0';
-        rf_oe2 <= '0';
+        if ir_type = R_JLTYPE then
+          rf_oe1 <= '1';
+          rf_oe2 <= '0';
+          goe <= '1';
+          gdir <= '1';
+        else
+          rf_oe1 <= '0';
+          rf_oe2 <= '0';
+          goe <= '0';
+          gdir <= '0';
+        end if;
 
-        goe <= '0';
-        gdir <= '0';
 
         mem_oe <= '0';
         mdr_src <= '0';
@@ -522,7 +539,7 @@ begin
         mem_rd <= '0';
         mem_wr <= '0';
         mem_len <= WORD;
-        if (ir_type = I_BTYPE or ir_type = JL_TYPE) then
+        if (ir_type = I_BTYPE or ir_type = JL_TYPE or ir_type = R_JLTYPE) then
           state := FI0;
         else
           state := WB0;
