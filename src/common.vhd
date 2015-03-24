@@ -14,7 +14,7 @@ package Common is
   type LEN_TYPE is (BYTE, HWORD, WORD);
   type STATE_TYPE is (FI0, FI1,
                       DE0,EX0,WB0);
-  type INST_TYPE is (R_TYPE, I_TYPE, I_BTYPE, J_TYPE, JL_TYPE);
+  type INST_TYPE is (R_TYPE, R_JTYPE, R_JLTYPE, I_TYPE, I_BTYPE, J_TYPE, JL_TYPE);
   type EXT_TYPE is (SIGN_EXTEND, ZERO_EXTEND, ADDR_EXTEND, UP_EXTEND);
 
   -- type alias

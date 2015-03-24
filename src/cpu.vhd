@@ -373,7 +373,11 @@ begin
         elsif op_field = OP_JAL then
           ir_type := JL_TYPE;
         elsif op_field = OP_SPECIAL then
-          ir_type := R_TYPE;
+          if func_field = FUNC_SPC_JR then
+            ir_type := R_JTYPE;
+          else
+            ir_type := R_TYPE;
+          end if;
         elsif (op_field(5 downto 2) = "0001") then-- branches
           ir_type := I_BTYPE;
         else
@@ -384,7 +388,11 @@ begin
           pc_wr <= '1';
           pc_upper_sel <= '1';
         else
-          pc_wr <= '0';
+          if ir_type = R_JTYPE then
+            pc_wr <= '1';
+          else
+            pc_wr <= '0';
+          end if;
           pc_upper_sel <= '0';
         end if;
         if ir_type = JL_TYPE then
@@ -415,7 +423,8 @@ begin
             ext_sel <= ZERO_EXTEND;
           end if;
         end if;
-        if (ir_type = R_TYPE or ir_type = I_BTYPE or ir_type = JL_TYPE) then
+        if (ir_type = R_TYPE or ir_type = I_BTYPE or
+            ir_type = JL_TYPE or ir_type = R_JTYPE) then
           imme_oe <= '0';
         else
           imme_oe <= '1';
@@ -429,7 +438,7 @@ begin
         if (ir_type = R_TYPE or ir_type = I_BTYPE) then
           rf_oe1 <= '1';
           rf_oe2 <= '1';
-        elsif (ir_type = I_TYPE) then
+        elsif (ir_type = I_TYPE or ir_type = R_JTYPE) then
           rf_oe1 <= '1';
           rf_oe2 <= '0';
         else
@@ -437,8 +446,13 @@ begin
           rf_oe2 <= '0';
         end if;
 
-        goe <= '0';
-        gdir <= '0';
+        if ir_type = R_JTYPE then
+          goe <= '1';
+          gdir <= '1';
+        else
+          goe <= '0';
+          gdir <= '0';
+        end if;
 
         mem_oe <= '0';
         mdr_src <= '0';
@@ -449,7 +463,7 @@ begin
         mem_wr <= '0';
         mem_len <= WORD;
 
-        if ir_type = J_TYPE then
+        if ir_type = J_TYPE or ir_type = R_JTYPE then
           state := FI0;
         else
           state := EX0;
