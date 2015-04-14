@@ -382,6 +382,8 @@ begin
           end if;
         elsif (op_field(5 downto 2) = "0001") then-- branches
           ir_type := I_BTYPE;
+        elsif (op_field(5 downto 4) = "10") then -- load, store
+          ir_type := I_MTYPE;
         else
           ir_type := I_TYPE;
         end if;
@@ -421,7 +423,8 @@ begin
         if (ir_type = J_TYPE or ir_type = JL_TYPE or ir_type = I_BTYPE) then
           ext_sel <= ADDR_EXTEND;
         elsif (ir_type = I_TYPE) then
-          if (op_field(2) = '0') then -- add, slt
+          if (op_field(2) = '0' or  -- add, slt
+              ir_type = I_MTYPE) then -- load, store
             ext_sel <= SIGN_EXTEND;
           elsif (op_field(2 downto 0) = "111") then -- lui
             ext_sel <= UP_EXTEND;
@@ -444,7 +447,7 @@ begin
         if (ir_type = R_TYPE or ir_type = I_BTYPE) then
           rf_oe1 <= '1';
           rf_oe2 <= '1';
-        elsif (ir_type = I_TYPE or ir_type = R_JTYPE) then
+        elsif (ir_type = I_TYPE or ir_type = R_JTYPE or ir_type = I_MTYPE) then
           rf_oe1 <= '1';
           rf_oe2 <= '0';
         else
@@ -530,7 +533,6 @@ begin
           gdir <= '0';
         end if;
 
-
         mem_oe <= '0';
         mdr_src <= '0';
         mdr_oe <= '0';
@@ -541,9 +543,123 @@ begin
         mem_len <= WORD;
         if (ir_type = I_BTYPE or ir_type = JL_TYPE or ir_type = R_JLTYPE) then
           state := FI0;
+        elsif (ir_type = I_MTYPE) then
+          state := MA0;
         else
           state := WB0;
         end if;
+      elsif (state = MA0) then -- send address
+        pc_oe <= '0';
+        pc_wr <= '0';
+        pc_upper_sel <= '0';
+        pc_nxt_oe <= '0';
+        pc_sel <= '0';
+
+        alu_oe <= '1';
+        alu_wr <= '0';
+
+        ir_wr <= '0';
+        wreg_sel <= '0';
+        link_sel <= '0';
+        ext_sel <= ZERO_EXTEND;
+        imme_oe <= '0';
+
+        rf_rw <= '0';
+        rf_oe1 <= '0';
+        rf_oe2 <= '0';
+
+        goe <= '0';
+        gdir <= '0';
+
+        mem_oe <= '0';
+        mdr_src <= '0';
+        mdr_oe <= '0';
+        mdr_wr <= '0';
+        mar_wr <= '1';
+        mem_rd <= '0';
+        mem_wr <= '0';
+        mem_len <= WORD;
+        if (op_field(3) = '1') then --store
+          state := MA1;
+        else -- load
+          state := MA2;
+        end if;
+      elsif (state = MA1) then -- send data
+        pc_oe <= '0';
+        pc_wr <= '0';
+        pc_upper_sel <= '0';
+        pc_nxt_oe <= '0';
+        pc_sel <= '0';
+
+        alu_oe <= '0';
+        alu_wr <= '0';
+
+        ir_wr <= '0';
+        wreg_sel <= '0';
+        link_sel <= '0';
+        ext_sel <= ZERO_EXTEND;
+        imme_oe <= '0';
+
+        rf_rw <= '0';
+        rf_oe1 <= '0';
+        rf_oe2 <= '1';
+
+        goe <= '1';
+        gdir <= '0';
+
+        mem_oe <= '0';
+        mdr_src <= '0';
+        mdr_oe <= '0';
+        mdr_wr <= '1';
+        mar_wr <= '0';
+        mem_rd <= '0';
+        mem_wr <= '0';
+        mem_len <= WORD;
+        state := MA2;
+      elsif (state = MA2) then
+        pc_oe <= '0';
+        pc_wr <= '0';
+        pc_upper_sel <= '0';
+        pc_nxt_oe <= '0';
+        pc_sel <= '0';
+
+        alu_oe <= '0';
+        alu_wr <= '0';
+
+        ir_wr <= '0';
+        wreg_sel <= '0';
+        link_sel <= '0';
+        ext_sel <= ZERO_EXTEND;
+        imme_oe <= '0';
+
+        if (op_field(3) = '0') then
+          rf_rw <= '1';
+        else
+          rf_rw <= '0';
+        end if;
+        rf_oe1 <= '0';
+        rf_oe2 <= '0';
+
+        goe <= '0';
+        gdir <= '0';
+
+        mdr_src <= '0';
+        mdr_wr <= '0';
+        mar_wr <= '0';
+
+        if (op_field(3) = '0') then
+          mem_oe <= '1';
+          mem_rd <= '1';
+          mem_wr <= '0';
+          mdr_oe <= '0';
+        else
+          mem_oe <= '0';
+          mem_rd <= '0';
+          mem_wr <= '1';
+          mdr_oe <= '1';
+        end if;
+        mem_len <= WORD;
+        state := FI0;
       elsif (state = WB0) then
         pc_oe <= '0';
         pc_wr <= '0';

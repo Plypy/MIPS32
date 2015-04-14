@@ -61,6 +61,16 @@ begin
     ALU_AND when OP_ANDI,
     ALU_OR when OP_ORI,
     ALU_XOR when OP_XORI,
-    ALU_ADDU when OP_LUI;
+    ALU_ADDU when OP_LUI,
+
+    ALU_ADDU when OP_LB,
+    ALU_ADDU when OP_LBU,
+    ALU_ADDU when OP_LH,
+    ALU_ADDU when OP_LHU,
+    ALU_ADDU when OP_LW,
+    ALU_ADDU when OP_SB,
+    ALU_ADDU when OP_SH,
+    ALU_ADDU when OP_SW;
+
 
 end architecture behav;

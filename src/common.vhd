@@ -13,8 +13,11 @@ package Common is
     ALU_SLT, ALU_SLTU);
   type LEN_TYPE is (BYTE, HWORD, WORD);
   type STATE_TYPE is (FI0, FI1,
-                      DE0,EX0,WB0);
-  type INST_TYPE is (R_TYPE, R_JTYPE, R_JLTYPE, I_TYPE, I_BTYPE, J_TYPE, JL_TYPE);
+                      DE0, EX0,
+                      MA0, MA1, MA2,
+                      WB0);
+  type INST_TYPE is (R_TYPE, R_JTYPE, R_JLTYPE, I_TYPE, I_BTYPE, I_MTYPE,
+                    J_TYPE, JL_TYPE);
   type EXT_TYPE is (SIGN_EXTEND, ZERO_EXTEND, ADDR_EXTEND, UP_EXTEND);
 
   -- type alias
@@ -45,6 +48,7 @@ package Common is
   constant OP_BLEZ : VEC6 := "000110";
   constant OP_BGTZ : VEC6 := "000111";
 
+  -- arith
   constant OP_ADDI : VEC6 := "001000";
   constant OP_ADDIU : VEC6 := "001001";
   constant OP_SLTI : VEC6 := "001010";
@@ -53,6 +57,21 @@ package Common is
   constant OP_ORI : VEC6 := "001101";
   constant OP_XORI : VEC6 := "001110";
   constant OP_LUI : VEC6 := "001111";
+
+  -- load
+  constant OP_LB : VEC6 := "100000";
+  constant OP_LH : VEC6 := "100001";
+  constant OP_LWL : VEC6 := "100010";
+  constant OP_LW : VEC6 := "100011";
+  constant OP_LBU : VEC6 := "100100";
+  constant OP_LHU : VEC6 := "100101";
+  constant OP_LWR : VEC6 := "100110";
+
+  -- store
+  constant OP_SB : VEC6 := "101000";
+  constant OP_SH : VEC6 := "101001";
+  constant OP_SWL : VEC6 := "101010";
+  constant OP_SW : VEC6 := "101011";
 
   -- These 2 instructions below are not listed in the standard
   constant LLO : VEC6 := "011000";
