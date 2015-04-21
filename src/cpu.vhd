@@ -640,8 +640,13 @@ begin
         rf_oe1 <= '0';
         rf_oe2 <= '0';
 
-        goe <= '0';
-        gdir <= '0';
+        if (op_field(3) = '0') then
+          goe <= '1';
+          gdir <= '1';
+        else
+          goe <= '0';
+          gdir <= '0';
+        end if;
 
         mdr_src <= '0';
         mdr_wr <= '0';
@@ -656,7 +661,7 @@ begin
           mem_oe <= '0';
           mem_rd <= '0';
           mem_wr <= '1';
-          mdr_oe <= '1';
+          mdr_oe <= '0';
         end if;
         mem_len <= WORD;
         state := FI0;
